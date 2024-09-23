@@ -33,3 +33,26 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Python dependencies
+__pycache__/
+*.py[cod]
+*.so
+.Python
+env/
+venv/
+ENV/
+venv.bak/
+
+# PyCharm specific files
+.idea/
+*.iml
+workspace.xml
+
+# Local environment and config files
+.env*
+.env*.local
+
+# OS-specific files
+.DS_Store
+
