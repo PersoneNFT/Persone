@@ -44,3 +44,12 @@ def get_collections(
         query = query.filter(models.Collection.owner_id == owner_id)
 
     return query.all()
+
+
+@router.get("/collections/{collection_id}", response_model=Collection)
+def get_collection_by_id(collection_id: int, db: Session = Depends(get_db)):
+    collection = db.query(models.Collection).filter_by(id=collection_id).first()
+    if not collection:
+        raise HTTPException(status_code=404, detail="Collection not found")
+    return collection
+

@@ -4,6 +4,7 @@ from fastapi import HTTPException
 from datetime import datetime
 
 
+# TODO: add smart contract functionality
 def finalize_auction(auction_id: int, db: Session):
     auction = db.query(models.Auction).filter_by(id=auction_id).first()
     if not auction:

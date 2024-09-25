@@ -7,6 +7,22 @@ from app.schemas.user import UserUpdate
 router = APIRouter()
 
 
+@router.post("/user/")
+def create_user(wallet_address: str, db: Session = Depends(get_db)):
+    # Check if the user already exists
+    user = db.query(models.User).filter_by(wallet_address=wallet_address).first()
+    if user:
+        raise HTTPException(status_code=400, detail="User already exists")
+
+    # Create a new user
+    new_user = models.User(wallet_address=wallet_address)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return {"message": "User created successfully", "user": new_user}
+
+
 @router.get("/user/{wallet_address}")
 def get_user(wallet_address: str, db: Session = Depends(get_db)):
     user = db.query(models.User).filter_by(wallet_address=wallet_address).first()

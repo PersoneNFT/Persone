@@ -4,7 +4,7 @@ from app.database import get_db
 from app import models
 from app.schemas.auction import Auction
 from app.services import verify_signature
-from datetime import datetime
+from app.services.auction import finalize_auction, place_bid
 
 router = APIRouter()
 
@@ -30,3 +30,30 @@ def create_auction(auction: Auction, db: Session = Depends(get_db), signature: s
     db.refresh(new_auction)
 
     return new_auction
+
+
+@router.get("/auctions/")
+def get_all_auctions(db: Session = Depends(get_db)):
+    auctions = db.query(models.Auction).all()
+    if not auctions:
+        raise HTTPException(status_code=404, detail="No auctions found")
+    return auctions
+
+
+@router.get("/auctions/{auction_id}")
+def get_auction_by_id(auction_id: int, db: Session = Depends(get_db)):
+    auction = db.query(models.Auction).filter_by(id=auction_id).first()
+    if not auction:
+        raise HTTPException(status_code=404, detail="Auction not found")
+    return auction
+
+
+@router.post("/auctions/{auction_id}/finalize")
+def finalize(auction_id: int, db: Session = Depends(get_db)):
+    return finalize_auction(auction_id, db)
+
+
+@router.post("/auctions/{auction_id}/bid")
+def bid(auction_id: int, bid_amount: float, wallet_address: str, db: Session = Depends(get_db)):
+    return place_bid(auction_id, bid_amount, wallet_address, db)
+
