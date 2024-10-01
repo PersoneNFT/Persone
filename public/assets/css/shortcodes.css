@@ -3368,6 +3368,39 @@ section.today-picks {
     font-weight: 700;
 }
 
+.select {
+    background: transparent !important;
+    font-size: 14px  !important;
+    border: 1px solid rgba(138, 138, 160, 0.3)  !important;
+    border-radius: 8px  !important;
+    padding: 9px 20px  !important;
+    margin-bottom: 24px  !important;
+    color: var(--primary-color2)  !important;
+}
+
+.collection-btn {
+    margin-bottom: 24px  !important;
+}
+
+.ai_row {
+    display: flex;
+    justify-content: center !important;
+}
+
+.ai_logo_container {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    width: 35em !important;
+    flex-direction: column;
+    width: 35em !important;
+}
+
+.ai_logo {
+    height: max-content !important;
+    width: 100%;
+}
+
 .form-inner form input {
     font-size: 14px;
     border: 1px solid rgba(138, 138, 160, 0.3);
@@ -4423,7 +4456,6 @@ section.today-picks {
     height: 40px;
     min-width: 40px;
     font-size: 16px;
-    margin-left: 10px;
     display: flex;
     display: -webkit-box;
     display: -ms-flexbox;

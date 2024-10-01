@@ -22,7 +22,7 @@ export default function Mode(): JSX.Element {
     <>
       <div className="mode_switcher">
         <h6>
-          Dark mode <strong>Available</strong>
+          Switch mode
         </h6>
         <a
           onClick={toggleTheme}

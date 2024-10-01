@@ -105,7 +105,7 @@ export default function CreateItem(): JSX.Element {
                                             <select
                                                 value={selectedCollection}
                                                 onChange={collectionHandler}
-                                                className="form-control"
+                                                className="select form-control"
                                             >
                                                 <option value="">
                                                     Select Collection
@@ -118,7 +118,7 @@ export default function CreateItem(): JSX.Element {
                                             </select>
                                             <button
                                                 type="button"
-                                                className="btn btn-secondary mt-2"
+                                                className="sc-button fl-button pri-3 collection-btn"
                                                 onClick={handleCreateNewCollection}
                                             >
                                                 Create New Collection

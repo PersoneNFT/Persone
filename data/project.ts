@@ -20,7 +20,7 @@ export const faq: Faq[] = [
     },
     {
         id: 2,
-        title: "Customer support is available ?",
+        title: "Customer support is available?",
         description: `Lorem ipsum dolor sit amet,
         consectetur adipiscing elit, sed do
         eiusmod tempor incididunt ut labore
@@ -33,7 +33,7 @@ export const faq: Faq[] = [
     },
     {
         id: 3,
-        title: " How do I find my transaction hash?",
+        title: " How does Persone AI works?",
         description: `Lorem ipsum dolor sit amet,
         consectetur adipiscing elit, sed do
         eiusmod tempor incididunt ut labore
@@ -46,7 +46,7 @@ export const faq: Faq[] = [
     },
     {
         id: 4,
-        title: "What are gas fees on Axies?",
+        title: "What are gas fees on Persone?",
         description: `Lorem ipsum dolor sit amet,
         consectetur adipiscing elit, sed do
         eiusmod tempor incididunt ut labore
@@ -59,7 +59,7 @@ export const faq: Faq[] = [
     },
     {
         id: 5,
-        title: "What is the effective staking amount?",
+        title: "Do you intend to launch a token in the future?",
         description: `Lorem ipsum dolor sit amet,
         consectetur adipiscing elit, sed do
         eiusmod tempor incididunt ut labore
