@@ -6,35 +6,35 @@ import { Autoplay } from "swiper";
 import Image from "next/image";
 
 const mgs1: string[] = [
-    "/assets/images/box-item/img_item1.png",
-    "/assets/images/box-item/img_item2.png",
+    "/assets/images/box-item/img_item9.png",
+    "/assets/images/box-item/img_item5.png",
     "/assets/images/box-item/img_item3.png",
     "/assets/images/box-item/img_item4.png",
+    "/assets/images/box-item/img_item10.png",
     "/assets/images/box-item/img_item1.png",
-    "/assets/images/box-item/img_item2.png",
-    "/assets/images/box-item/img_item3.png",
+    "/assets/images/box-item/img_item8.png",
     "/assets/images/box-item/img_item4.png",
 ];
 
 const mgs2: string[] = [
-    "/assets/images/box-item/img_item4.png",
+    "/assets/images/box-item/img_item7.png",
     "/assets/images/box-item/img_item3.png",
     "/assets/images/box-item/img_item2.png",
-    "/assets/images/box-item/img_item1.png",
-    "/assets/images/box-item/img_item4.png",
+    "/assets/images/box-item/img_item11.png",
+    "/assets/images/box-item/img_item5.png",
     "/assets/images/box-item/img_item3.png",
-    "/assets/images/box-item/img_item2.png",
+    "/assets/images/box-item/img_item11.png",
     "/assets/images/box-item/img_item1.png",
 ];
 
 const mgs3: string[] = [
     "/assets/images/box-item/img_item2.png",
-    "/assets/images/box-item/img_item1.png",
+    "/assets/images/box-item/img_item10.png",
     "/assets/images/box-item/img_item4.png",
-    "/assets/images/box-item/img_item3.png",
-    "/assets/images/box-item/img_item2.png",
-    "/assets/images/box-item/img_item1.png",
-    "/assets/images/box-item/img_item4.png",
+    "/assets/images/box-item/img_item8.png",
+    "/assets/images/box-item/img_item9.png",
+    "/assets/images/box-item/img_item8.png",
+    "/assets/images/box-item/img_item6.png",
     "/assets/images/box-item/img_item3.png",
 ];
 

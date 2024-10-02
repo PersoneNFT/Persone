@@ -20,7 +20,7 @@ const item = {
 };
 
 export const metadata: Metadata = {
-    title: "Axies | NFT Marketplace React/Next Js Template | Login",
+    title: "Persone | First AI Powered NFT Marketplace on Soneium | Login",
 };
 export default function page(): JSX.Element {
     return (

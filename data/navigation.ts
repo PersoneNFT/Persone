@@ -30,7 +30,7 @@ export const navigation: NavigationType[] = [
             {
                 id: 3,
                 name: "Persone AI",
-                path: "/persone-ai",
+                path: "/personeai",
             },
         ],
     },
