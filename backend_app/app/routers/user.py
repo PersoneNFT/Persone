@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app import models
-from app.schemas.user import UserUpdate
+from app.schemas.user import UserUpdate, AuthPayload
+from app.services.verify_signature import verify_signature
 
 router = APIRouter()
 
@@ -48,3 +49,10 @@ def update_user_profile(wallet_address: str, user_data: UserUpdate, db: Session 
 
     db.commit()
     return user
+
+
+@router.post("/auth")
+async def authenticate_user(payload: AuthPayload):
+    verify_signature(payload.message, payload.signature, payload.address)
+    return {"message": "Authenticated", "address": payload.address}
+

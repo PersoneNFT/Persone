@@ -56,3 +56,8 @@ workspace.xml
 # OS-specific files
 .DS_Store
 
+
+# Alembic
+alembic/versions/*
+!alembic/versions/.keep  # If you want to keep the folder without specific migration files
+alembic.ini
