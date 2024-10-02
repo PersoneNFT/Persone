@@ -33,13 +33,16 @@ class NFT(Base):
 class Auction(Base):
     __tablename__ = "auctions"
     id = Column(Integer, primary_key=True, index=True)
-    nft_id = Column(Integer, ForeignKey("nfts.id"), nullable=False)
-    seller_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    nft_id = Column(Integer, nullable=False)
+    seller_wallet = Column(String(42), nullable=False)
     starting_bid = Column(DECIMAL(18, 2), nullable=False)
     highest_bid = Column(DECIMAL(18, 2), nullable=True)
-    # highest_bidder_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    highest_bidder_wallet = Column(String(42), nullable=True)
     end_time = Column(TIMESTAMP, nullable=False)
+    status = Column(String, default="active")  # "active", "finalized"
     created_at = Column(TIMESTAMP, default="now()")
+    finalized_at = Column(TIMESTAMP, nullable=True)
+
 
 
 class SaleListing(Base):
