@@ -13,3 +13,5 @@ pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+Documentation link: [https://persone.gitbook.io/persone-docs](https://persone.gitbook.io/persone-docs)
