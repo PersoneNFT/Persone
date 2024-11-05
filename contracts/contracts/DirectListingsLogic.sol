@@ -10,136 +10,74 @@ import "../../../extension/upgradeable/ReentrancyGuard.sol";
 import "../../../extension/upgradeable/PermissionsEnumerable.sol";
 import { CurrencyTransferLib } from "../../../lib/CurrencyTransferLib.sol";
 
-contract DirectListingsLogic is IDirectListings, ReentrancyGuard {
-    bytes32 private constant LISTER_ROLE = keccak256("LISTER_ROLE");
-    bytes32 private constant ASSET_ROLE = keccak256("ASSET_ROLE");
-    uint64 private constant MAX_BPS = 10_000;
-    address private immutable nativeTokenWrapper;
+contract DirectListingsHandler is IDirectListings, ReentrancyGuard {
+    bytes32 private constant ROLE_LISTER = keccak256("ROLE_LISTER");
+    bytes32 private constant ROLE_ASSET = keccak256("ROLE_ASSET");
+    uint64 private constant MAX_PERCENTAGE = 10_000;
+    address private immutable tokenWrapper;
 
-    modifier onlyListerRole() {
-        require(Permissions(address(this)).hasRoleWithSwitch(LISTER_ROLE, msg.sender), "!LISTER_ROLE");
+    modifier ensureListerRole() {
+        require(Permissions(address(this)).hasRoleWithSwitch(ROLE_LISTER, msg.sender), "Not authorized: Lister role required");
         _;
     }
 
-    modifier onlyAssetRole(address _asset) {
-        require(Permissions(address(this)).hasRoleWithSwitch(ASSET_ROLE, _asset), "!ASSET_ROLE");
+    modifier ensureAssetRole(address assetAddress) {
+        require(Permissions(address(this)).hasRoleWithSwitch(ROLE_ASSET, assetAddress), "Not authorized: Asset role required");
         _;
     }
 
-    modifier onlyListingCreator(uint256 _listingId) {
-        require(
-            _directListingsStorage().listings[_listingId].listingCreator == msg.sender,
-            "Marketplace: not listing creator."
-        );
+    modifier verifyListingOwner(uint256 listingId) {
+        require(_retrieveDirectListings().listings[listingId].listingCreator == msg.sender, "Not authorized: Must be listing creator.");
         _;
     }
 
-    modifier onlyExistingListing(uint256 _listingId) {
-        require(
-            _directListingsStorage().listings[_listingId].status == IDirectListings.Status.CREATED,
-            "Marketplace: invalid listing."
-        );
+    modifier validateListingExists(uint256 listingId) {
+        require(_retrieveDirectListings().listings[listingId].status == IDirectListings.Status.CREATED, "Listing does not exist or is inactive.");
         _;
     }
 
-    constructor(address _nativeTokenWrapper) {
-        nativeTokenWrapper = _nativeTokenWrapper;
+    constructor(address wrapperAddress) {
+        tokenWrapper = wrapperAddress;
     }
 
-    function createListing(
-        ListingParameters calldata _params
-    ) external onlyListerRole onlyAssetRole(_params.assetContract) returns (uint256 listingId) {
-        listingId = _getNextListingId();
-        address listingCreator = msg.sender;
-        TokenType tokenType = _getTokenType(_params.assetContract);
+    function initiateListing(
+        ListingParameters calldata listingParams
+    ) external ensureListerRole ensureAssetRole(listingParams.assetContract) returns (uint256 newListingId) {
+        newListingId = _generateNewListingId();
+        address creatorAddress = msg.sender;
+        TokenType itemType = _identifyTokenType(listingParams.assetContract);
 
-        uint128 startTime = _params.startTimestamp;
-        uint128 endTime = _params.endTimestamp;
-        require(startTime < endTime, "Marketplace: endTimestamp not greater than startTimestamp.");
-        if (startTime < block.timestamp) {
-            require(startTime + 60 minutes >= block.timestamp, "Marketplace: invalid startTimestamp.");
+        uint128 startTimestamp = listingParams.startTimestamp;
+        uint128 endTimestamp = listingParams.endTimestamp;
 
-            startTime = uint128(block.timestamp);
-            endTime = endTime == type(uint128).max
-                ? endTime
-                : startTime + (_params.endTimestamp - _params.startTimestamp);
+        require(startTimestamp < endTimestamp, "Invalid timestamps: End must be after start.");
+
+        if (startTimestamp < block.timestamp) {
+            require(startTimestamp + 1 hours >= block.timestamp, "Invalid start: Too old.");
+
+            startTimestamp = uint128(block.timestamp);
+            endTimestamp = (endTimestamp == type(uint128).max)
+                ? endTimestamp
+                : startTimestamp + (listingParams.endTimestamp - listingParams.startTimestamp);
         }
 
-        _validateNewListing(_params, tokenType);
+        _confirmNewListing(listingParams, itemType);
 
-        Listing memory listing = Listing({
-            listingId: listingId,
-            listingCreator: listingCreator,
-            assetContract: _params.assetContract,
-            tokenId: _params.tokenId,
-            quantity: _params.quantity,
-            currency: _params.currency,
-            pricePerToken: _params.pricePerToken,
-            startTimestamp: startTime,
-            endTimestamp: endTime,
-            reserved: _params.reserved,
-            tokenType: tokenType,
+        Listing memory newListing = Listing({
+            listingId: newListingId,
+            listingCreator: creatorAddress,
+            assetContract: listingParams.assetContract,
+            tokenId: listingParams.tokenId,
+            quantity: listingParams.quantity,
+            currency: listingParams.currency,
+            pricePerToken: listingParams.pricePerToken,
+            startTimestamp: startTimestamp,
+            endTimestamp: endTimestamp,
+            itemType: itemType,
             status: IDirectListings.Status.CREATED
         });
 
-        _directListingsStorage().listings[listingId] = listing;
-
-        emit NewListing(listingCreator, listingId, _params.assetContract, listing);
+        _retrieveDirectListings().listings[newListingId] = newListing;
+        emit ListingCreated(newListingId, creatorAddress, listingParams.assetContract, listingParams.tokenId, listingParams.quantity);
     }
 
-    function _payout(
-        address _payer,
-        address _payee,
-        address _currencyToUse,
-        uint256 _totalPayoutAmount,
-        Listing memory _listing
-    ) internal {
-        uint256 amountRemaining;
-
-        (address platformFeeRecipient, uint16 platformFeeBps) = IPlatformFee(address(this)).getPlatformFeeInfo();
-        uint256 platformFeeCut = (_totalPayoutAmount * platformFeeBps) / MAX_BPS;
-
-        // Transfer platform fee
-        CurrencyTransferLib.transferCurrencyWithWrapper(
-            _currencyToUse,
-            _payer,
-            platformFeeRecipient,
-            platformFeeCut,
-            nativeTokenWrapper
-        );
-
-        // Transfer remaining amount to the payee (seller)
-        amountRemaining = _totalPayoutAmount - platformFeeCut;
-        CurrencyTransferLib.transferCurrencyWithWrapper(_currencyToUse, _payer, _payee, amountRemaining, nativeTokenWrapper);
-    }
-
-    function _validateNewListing(ListingParameters memory _params, TokenType _tokenType) internal view {
-        require(_params.quantity > 0, "Marketplace: listing zero quantity.");
-        require(_params.quantity == 1 || _tokenType == TokenType.ERC1155, "Marketplace: listing invalid quantity.");
-
-        require(
-            _validateOwnershipAndApproval(
-                msg.sender,
-                _params.assetContract,
-                _params.tokenId,
-                _params.quantity,
-                _tokenType
-            ),
-            "Marketplace: not owner or approved tokens."
-        );
-    }
-
-    function _getTokenType(address _assetContract) internal view returns (TokenType tokenType) {
-        if (IERC165(_assetContract).supportsInterface(type(IERC1155).interfaceId)) {
-            tokenType = TokenType.ERC1155;
-        } else if (IERC165(_assetContract).supportsInterface(type(IERC721).interfaceId)) {
-            tokenType = TokenType.ERC721;
-        } else {
-            revert("Marketplace: listed token must be ERC1155 or ERC721.");
-        }
-    }
-
-    function _directListingsStorage() internal pure returns (DirectListingsStorage.Data storage data) {
-        data = DirectListingsStorage.data();
-    }
-}
